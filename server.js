@@ -13,19 +13,54 @@ app.use(bodyParser.json()) //SendJSON response
 app.use(logger('dev'))
 app.use(cors());
 
+/*
+db connection
+*/
+let db = require('./db_config');
+const mongoose = require('mongoose');
+mongoose.Promise = global.Promise;
+let User = require('./models/user');
+let Business = require('./models/business');
+let Review = require('./models/review');
+let Profile = require('./models/profile');
+var options = {
+    useMongoClient: true
+};
+var connectionString = `mongodb://${db.username}:${db.password}@${db.url}:${db.port}/${db.db_name}?authSource=admin`
+
 
 app.get('/business/:id', (req, res) => {
-    res.send('not implemented')
+   Business.findOne({"_id": req.params.id}).then((data,err) => 
+   {
+       if(err)
+        {
+            return res.status(404).send({"msg":"business not present in dataset"});
+        }
+        return res.status(200).send(data);
+   })
 });
 
-app.get('/business/:id/strengths', (req, res) => {
-    res.send('not implemented')
+app.get('/profile/:id', (req, res) => {
+    Profile.findOne({"_id": req.params.id}).then((data,err) => 
+    {
+        if(err)
+         {
+             return res.status(404).send({"msg":"business not present in dataset"});
+         }
+         return res.status(200).send(data);
+    })
 });
 
 app.get('/business/:id/weaknesses', (req, res) => {
     res.send('not implemented')
 });
 
-server.listen(port, () => {
-        console.log(`backend listening on port ${port}`);
+mongoose.connect(connectionString, options)
+.then((db) => {
+        server.listen(port, () => {
+                console.log(`backend listening on port ${port}`);
+        });
+})
+.catch((err) => {
+    console.log(err);
 });
