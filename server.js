@@ -1,12 +1,16 @@
 var http = require("http");
-var express = require('express')
+var express = require('express');
 var app = express();
 var logger = require('morgan')
 var bodyParser = require('body-parser')
 var cors = require("cors")
-
 var server = http.createServer(app);
 let port = process.env.PORT || 8080;
+
+/*
+ jwt middleware
+*/
+var jwtCheck = require('./middlewares/auth');
 
 app.use(bodyParser.urlencoded({ extended: false })); //Parses urlencoded bodies
 app.use(bodyParser.json()) //SendJSON response
@@ -16,6 +20,9 @@ app.use(cors());
 /*
 db connection
 */
+
+let UserController = require('./controllers/userController');
+let userController = new UserController();
 let db = require('./db_config');
 const mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
@@ -29,6 +36,9 @@ var options = {
 var connectionString = `mongodb://${db.username}:${db.password}@${db.url}:${db.port}/${db.db_name}?authSource=admin`
 
 
+
+app.use('/profile/:id',jwtCheck);
+app.get('/business/:id',jwtCheck);
 app.get('/business/:id', (req, res) => {
    Business.findOne({"_id": req.params.id}).then((data,err) => 
    {
@@ -41,6 +51,8 @@ app.get('/business/:id', (req, res) => {
 });
 
 app.get('/profile/:id', (req, res) => {
+    // console.log("-----------------USER-----------------------")
+    // console.log(req.user);
     Profile.findOne({"_id": req.params.id}).then((data,err) => 
     {
         if(err)
@@ -55,6 +67,10 @@ app.get('/business/:id/weaknesses', (req, res) => {
     res.send('not implemented')
 });
 
+app.route('/auth/register')
+    .post(userController.register);
+app.route('/auth/sign_in')
+    .post(userController.sign_in);
 mongoose.connect(connectionString, options)
 .then((db) => {
         server.listen(port, () => {
