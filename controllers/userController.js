@@ -9,24 +9,28 @@ class UserController {
     }
 
     register(req, res) {
-        let newUser = new AppUser(req.body);
-        newUser.hash_password = bcrypt.hashSync(req.body.password, 10);
+        console.log(req.body);
+        let newUser = new AppUser(req.body.user);
+        newUser.hash_password = bcrypt.hashSync(req.body.user.password, 10);
         newUser.save((err, user) => {
+            console.log(err);
             if (err) {
                 return res.status(400).send({
                     message: err
                 });
             } else {
                 user.hash_password = undefined;
+
                 return res.json(user);
             }
         })
     }
 
     sign_in(req, res) {
+
         AppUser.findOne({
-            email: req.body.email
-        }).then((user, err)=>{
+            username: req.body.username
+        }).then((user, err) => {
             if (err) throw err;
             if (!user)
                 return res.status(401).json({
@@ -37,12 +41,13 @@ class UserController {
                     return res.status(401).json({
                         message: 'Authentication failed. Wrong password.'
                     });
+                try {
+                    delete user.hash_password;
+                } catch (err) {
+                    console.log("err while deleting hash_password from user object");
+                }
                 return res.json({
-                    token: jwt.sign({
-                        email: user.email,
-                        fullName: user.fullName,
-                        _id: user._id
-                    }, auth_settings.secret)
+                    token: jwt.sign(JSON.parse(JSON.stringify(user)), auth_settings.secret)
                 });
 
             }

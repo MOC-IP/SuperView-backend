@@ -51,7 +51,7 @@ app.get('/business/:id', (req, res) => {
    })
 });
 
-app.get('/profile/:id', (req, res) => {
+app.get('/v1/profile/:id', (req, res) => {
     // console.log("-----------------USER-----------------------")
     // console.log(req.user);
     Profile.findOne({"_id": req.params.id}).then((data,err) => 
@@ -64,7 +64,7 @@ app.get('/profile/:id', (req, res) => {
     })
 });
 
-app.get('/profile_v2/:id', (req, res) => {
+app.get('/v2/profile/:id', (req, res) => {
     Profile_v2.findOne({"business_id": req.params.id}).then((data,err) => 
     {
         if(err)
@@ -83,11 +83,11 @@ app.get('/profile_v2/:id', (req, res) => {
         items.sort(function(first, second) { return second[1] - first[1]; });
         
         for (tt in items.slice(0,5)){
-            strengths.push(data.topics[items[tt][0]]);
+            strengths.push({'name':items[tt][0], 'data':data.topics[items[tt][0]]});
         }
 
         for (tt in items.reverse().slice(0,5)){
-            weaknesses.push(data.topics[items[tt][0]]);
+            weaknesses.push({'name':items[tt][0], 'data':data.topics[items[tt][0]]});
         }
          return res.status(200).send({'strengths': strengths, 'weaknesses': weaknesses});
     })

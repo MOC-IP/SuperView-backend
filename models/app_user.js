@@ -3,32 +3,38 @@ var Schema = mongoose.Schema;
 var bcrypt = require('bcrypt');
 // create a schema
 var appUserSchema = new Schema({
-    fullName:{
+    username: {
+        type: String,
+        required: true,
+        trim: true
+
+    },
+    fullname: {
         type: String,
         trim: true,
         required: true,
     },
-    email:{
+    email: {
         type: String,
-        unique:true,
-        lowercase:true,
-        trim:true,
-        required:true
+        unique: true,
+        lowercase: true,
+        trim: true,
+        required: true
     },
-    hash_password:{
-        type:String,
-        required:true
+    hash_password: {
+        type: String,
+        required: true
 
     },
-    created:{
-        type:Date,
+    created: {
+        type: Date,
         default: Date.now
     },
-    ownedBusinesses:Array
+    ownedBusinesses: Array
 });
 
-appUserSchema.methods.comparePassword = function(password){
-    return bcrypt.compareSync(password,this._doc.hash_password);
+appUserSchema.methods.comparePassword = function (password) {
+    return bcrypt.compareSync(password, this._doc.hash_password);
 }
 
 var User = mongoose.model('app_user', appUserSchema);
